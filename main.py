@@ -2,19 +2,22 @@ import math
 
 class node():
     def __init__(self):
-        self.leftNode = None
-        self.rightNode = None
+        self.leftNode = None # 0 side
+        self.rightNode = None # 1 side
         self.data = []
         self.splitOn =""
-        self.entropy = None
+        self.entropy = 1
+        self.leafClass = None
 
     def splitOnBestInformationGain (self, attributes):
-        classIndex = attributes.__len__()-1
+        classIndex = len(attributes)-1
 
         # Calculate current Entropy of node
         if self.entropy == None:
             self.calEntropy(classIndex)
         H = self.entropy
+
+        print(attributes)
 
         IGList = [] # Information Gain List
         for attribute in attributes:
@@ -48,14 +51,46 @@ class node():
         maxIG = max(IGList)
         if maxIG > 0 and attributes[IGList.index(maxIG)] != "splitColumn":
             self.splitOn = attributes[IGList.index(maxIG)]
+            # Nodes to split on
+            self.leftNode = node()
+            self.rightNode = node()
+
+            # Split data on attribute
+            print("Splitting on " + self.splitOn)
+            index = attributes.index(self.splitOn)
+
+            # Mark split attribute as completed
+            attributes[index] = "splitColumn"
+
+            for each in self.data:
+                if each[index] == '0':
+                    self.leftNode.data.append(each)
+                else:
+                    self.rightNode.data.append(each)
+
+            # Calculate entropies
+            self.leftNode.calEntropy(classIndex)
+            self.rightNode.calEntropy(classIndex)
         else:
             self.splitOn = None
+            self.calLeafClass(classIndex)
             print("Done splitting on this node")
-        return self.splitOn
+
+        return
 
     # Easier call
     def calEntropy(self, classIndex):
         self.entropy = calcEntropy(self.data, classIndex);
+
+    def calLeafClass(self, classIndex):
+        total = 0
+        for each in self.data:
+            total += int(each[classIndex])
+        # Set to the most frequet class
+        print("total = " + str(total))
+        print("len = " + str(len(self.data)))
+        self.leafClass = round( total / len(self.data))
+        print("leafClass = " + str(self.leafClass))
 
 def calcEntropy (data, classIndex):
     negatives = 0
@@ -82,34 +117,40 @@ def ID3 (attributes, currentNode):
     if currentNode.splitOn == None:
         return
 
-    # Nodes to split on
-    currentNode.leftNode = node()
-    currentNode.rightNode = node()
-
-    # Split data on attribute
-    print("Splitting on " + currentNode.splitOn)
-    index = attributes.index(currentNode.splitOn)
-
-    # Mark split attribute as completed
-    attributes[index] = "splitColumn"
-
-    for each in currentNode.data:
-        if each[index] == '0':
-            currentNode.leftNode.data.append(each)
-        else:
-            currentNode.rightNode.data.append(each)
-
-    # Calculate entropies
-    classIndex = attributes.__len__() - 1
-    currentNode.leftNode.calEntropy(classIndex)
-    currentNode.rightNode.calEntropy(classIndex)
-
     # Recursive calls
     if currentNode.leftNode.entropy != 0:
         ID3(attributes[:], currentNode.leftNode)
+    else:
+        # Pure node, determine class
+        currentNode.leftNode.calLeafClass(len(attributes) - 1)
+
     if currentNode.rightNode.entropy != 0:
         ID3(attributes[:], currentNode.rightNode)
+    else:
+        # Pure node, determine class
+        currentNode.rightNode.calLeafClass(len(attributes) - 1)
+
     return
+
+
+def displayTree(currentNode, depth):
+    # Base case
+    if currentNode == None:
+        return
+    if currentNode.leftNode == None:
+        print(str(currentNode.leafClass), end='')
+        return
+
+    # Print what this node split on
+    # 0 side
+    print("\n" + "| " * depth + currentNode.splitOn + " = 0 : ", end='')
+    displayTree(currentNode.leftNode, depth+1)
+
+    # 1 side
+    print("\n" + "| " * depth + currentNode.splitOn + " = 1 : ", end='')
+    displayTree(currentNode.rightNode, depth+1)
+
+    pass
 
 
 def main():
@@ -125,6 +166,7 @@ def main():
         #information gain is calculated in the next two functions and returns the value we need to split by
         # Where the magic happens
         ID3(attributes[:], headNode)
+        displayTree(headNode, 0)
 
 
 if __name__ == "__main__":
