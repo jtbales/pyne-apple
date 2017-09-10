@@ -1,4 +1,5 @@
 import math
+mostFrequentClassOverall = -1
 
 class node():
     def __init__(self):
@@ -86,11 +87,15 @@ class node():
         total = 0
         for each in self.data:
             total += int(each[classIndex])
-        # Set to the most frequet class
-        print("total = " + str(total))
-        print("len = " + str(len(self.data)))
-        self.leafClass = round( total / len(self.data))
-        print("leafClass = " + str(self.leafClass))
+        # Tie breaking - If you reach a leaf node in the decision tree and have no examples left or the examples are equally split among multiple classes, then choose the class that is most frequent in the entire training set.
+        if total == len(self.data)/2:
+            self.leafClass = mostFrequentClassOverall
+        # Set to the most frequent class
+        else:
+            print("total = " + str(total))
+            print("len = " + str(len(self.data)))
+            self.leafClass = round( total / len(self.data))
+            print("leafClass = " + str(self.leafClass))
 
 def calcEntropy (data, classIndex):
     negatives = 0
@@ -162,8 +167,16 @@ def main():
         headNode = node()
         for line in trainingFile:
             headNode.data.append(line.strip().replace('\t', ''))
-        #somewhere here I expect to have to implement recursion but I haven't worked it out yet
-        #information gain is calculated in the next two functions and returns the value we need to split by
+
+        # Calculate most frequent class, set global instead of passing mostFrequentClassOverall or full dataset around to ever function
+        classIndex = len(attributes) - 1
+        total = 0
+        for each in headNode.data:
+            total += int(each[classIndex])
+        global mostFrequentClassOverall
+        mostFrequentClassOverall \
+            = round(total / len(headNode.data))
+
         # Where the magic happens
         ID3(attributes[:], headNode)
         displayTree(headNode, 0)
