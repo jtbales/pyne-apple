@@ -1,6 +1,5 @@
 import math
 
-#made some teeny tiny changes to the original code
 class node():
     def __init__(self):
         self.leftNode = None
