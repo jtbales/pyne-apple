@@ -11,7 +11,7 @@ class node():
         self.leafClass = None
 
     def splitOnBestInformationGain (self, attributes):
-        classIndex = len(attributes)-1
+        classIndex = attributes.index("class")
 
         # Calculate current Entropy of node
         if self.entropy == None:
@@ -32,11 +32,11 @@ class node():
 
             # Split data on attribute
             index = attributes.index(attribute)
-            for each in self.data:
-                if each[index] == '0':
-                    leftSplit.append(each)
+            for row in self.data:
+                if row[index] == '0':
+                    leftSplit.append(row)
                 else:
-                    rightSplit.append(each)
+                    rightSplit.append(row)
             # print(leftSplit)
 
             # Calculate IG with formula
@@ -85,17 +85,18 @@ class node():
 
     def calLeafClass(self, classIndex):
         total = 0
-        for each in self.data:
-            total += int(each[classIndex])
+        for row in self.data:
+            total += int(row[classIndex])
+
         # Tie breaking - If you reach a leaf node in the decision tree and have no examples left or the examples are equally split among multiple classes, then choose the class that is most frequent in the entire training set.
         if total == len(self.data)/2:
             self.leafClass = mostFrequentClassOverall
         # Set to the most frequent class
         else:
-            print("total = " + str(total))
-            print("len = " + str(len(self.data)))
+            # print("total = " + str(total))
+            # print("len = " + str(len(self.data)))
             self.leafClass = round( total / len(self.data))
-            print("leafClass = " + str(self.leafClass))
+            # print("leafClass = " + str(self.leafClass))
 
 def calcEntropy (data, classIndex):
     negatives = 0
@@ -115,7 +116,7 @@ def calcEntropy (data, classIndex):
 
 # Main ID3 algorithm
 def ID3 (attributes, currentNode):
-    print("starting ID3")
+    # print("starting ID3")
     currentNode.splitOnBestInformationGain(attributes)
 
     # Base Case
@@ -127,13 +128,13 @@ def ID3 (attributes, currentNode):
         ID3(attributes[:], currentNode.leftNode)
     else:
         # Pure node, determine class
-        currentNode.leftNode.calLeafClass(len(attributes) - 1)
+        currentNode.leftNode.calLeafClass(attributes.index("class"))
 
     if currentNode.rightNode.entropy != 0:
         ID3(attributes[:], currentNode.rightNode)
     else:
         # Pure node, determine class
-        currentNode.rightNode.calLeafClass(len(attributes) - 1)
+        currentNode.rightNode.calLeafClass(attributes.index("class"))
 
     return
 
@@ -157,10 +158,37 @@ def displayTree(currentNode, depth):
 
     pass
 
+def getAccuracy(headNode, data, attributes):
+    correct = 0
+
+    # loop over data
+    for row in data:
+        # traverse binary tree
+        node = headNode
+        while node != None:
+            # leaf node
+            if node.leafClass == 0 or node.leafClass == 1:
+                # add correct count
+                # print("leaf class = " + str(node.leafClass))
+                # print("row class = " + row[attributes.index("class")])
+                if int(node.leafClass) == int(row[attributes.index("class")]):
+                    correct += 1
+                break
+            # Go in direction of split
+            else:
+                # left
+                if row[attributes.index(node.splitOn)] == 0:
+                    node = node.leftNode
+                else:
+                    node = node.rightNode
+
+    print(correct / int(len(data)))
+    pass
+
 
 def main():
     # Reading in data just reading in the training file (train.dat)
-    with open("train.dat") as trainingFile:
+    with open("train2.dat") as trainingFile:
         first_line = trainingFile.readline()
         attributes = first_line.split()
         #this is where we initialize the headNode (the very first node)
@@ -169,17 +197,25 @@ def main():
             headNode.data.append(line.strip().replace('\t', ''))
 
         # Calculate most frequent class, set global instead of passing mostFrequentClassOverall or full dataset around to ever function
-        classIndex = len(attributes) - 1
         total = 0
         for each in headNode.data:
-            total += int(each[classIndex])
+            total += int(each[attributes.index("class")])
         global mostFrequentClassOverall
         mostFrequentClassOverall \
             = round(total / len(headNode.data))
 
         # Where the magic happens
         ID3(attributes[:], headNode)
+
+        # Display the tree
         displayTree(headNode, 0)
+        print()
+
+        # Accuracy on training set
+        getAccuracy(headNode, headNode.data, attributes)
+
+        # Accuracy on test set
+
 
 
 if __name__ == "__main__":
