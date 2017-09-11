@@ -182,39 +182,51 @@ def getAccuracy(headNode, data, attributes):
                 else:
                     node = node.rightNode
 
-    print(correct / int(len(data)))
-    pass
+    return (correct / int(len(data))) * 100
 
 
 def main():
     # Reading in data just reading in the training file (train.dat)
-    with open("train2.dat") as trainingFile:
+    with open("train2.dat") as trainingFile, open ("test2.dat") as testFile:
         first_line = trainingFile.readline()
         attributes = first_line.split()
-        #this is where we initialize the headNode (the very first node)
-        headNode = node()
+
+        trainingData = []
         for line in trainingFile:
-            headNode.data.append(line.strip().replace('\t', ''))
+            trainingData.append(line.strip().replace('\t', ''))
 
         # Calculate most frequent class, set global instead of passing mostFrequentClassOverall or full dataset around to ever function
         total = 0
-        for each in headNode.data:
+        for each in trainingData:
             total += int(each[attributes.index("class")])
         global mostFrequentClassOverall
         mostFrequentClassOverall \
-            = round(total / len(headNode.data))
+            = round(total / len(trainingData))
 
+        # this is where we initialize the headNode (the very first node)
+        headNode = node()
+        headNode.data = trainingData[:]
         # Where the magic happens
         ID3(attributes[:], headNode)
 
         # Display the tree
         displayTree(headNode, 0)
         print()
+        print()
 
         # Accuracy on training set
-        getAccuracy(headNode, headNode.data, attributes)
+        trainingAccuracy = getAccuracy(headNode, trainingData, attributes)
+        print("Accuracy on training set (" + str(len(trainingData)) + "): " + "{0:.1f}".format(trainingAccuracy) + "%")
+
+        # Parse Test data
+        testData = []
+        for line in testFile:
+            testData.append(line.strip().replace('\t', ''))
+        testData.pop(0) # Remove headers
 
         # Accuracy on test set
+        testAccuracy = getAccuracy(headNode, testData, attributes)
+        print("Accuracy on test set (" + str(len(trainingData)) + "): " + "{0:.1f}".format(testAccuracy) + "%")
 
 
 
