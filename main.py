@@ -1,4 +1,5 @@
 import math
+import sys
 mostFrequentClassOverall = -1
 
 class node():
@@ -18,7 +19,7 @@ class node():
             self.calEntropy(classIndex)
         H = self.entropy
 
-        print(attributes)
+        #print(attributes)
 
         IGList = [] # Information Gain List
         for attribute in attributes:
@@ -48,7 +49,7 @@ class node():
             IGList.append(IG)
 
         # Sets node to split on the attritute where we have maximum information gain
-        print(IGList)
+        #print(IGList)
         maxIG = max(IGList)
         if maxIG > 0 and attributes[IGList.index(maxIG)] != "splitColumn":
             self.splitOn = attributes[IGList.index(maxIG)]
@@ -75,7 +76,7 @@ class node():
         else:
             self.splitOn = None
             self.calLeafClass(classIndex)
-            print("Done splitting on this node")
+            #print("Done splitting on this node")
 
         return
 
@@ -138,7 +139,6 @@ def ID3 (attributes, currentNode):
 
     return
 
-
 def displayTree(currentNode, depth):
     # Base case
     if currentNode == None:
@@ -186,8 +186,13 @@ def getAccuracy(headNode, data, attributes):
 
 
 def main():
+    if len(sys.argv)!=3:
+        print ("requires two arguments. \"python3 <python file name> <training file> <testing file>\" ")
+        exit()
+
+
     # Reading in data just reading in the training file (train.dat)
-    with open("train2.dat") as trainingFile, open ("test2.dat") as testFile:
+    with open(sys.argv[1]) as trainingFile, open (sys.argv[2]) as testFile:
         first_line = trainingFile.readline()
         attributes = first_line.split()
 
@@ -211,12 +216,12 @@ def main():
 
         # Display the tree
         displayTree(headNode, 0)
-        print()
-        print()
+        #print()
+        #print()
 
         # Accuracy on training set
         trainingAccuracy = getAccuracy(headNode, trainingData, attributes)
-        print("Accuracy on training set (" + str(len(trainingData)) + "): " + "{0:.1f}".format(trainingAccuracy) + "%")
+        #print("Accuracy on training set (" + str(len(trainingData)) + "): " + "{0:.1f}".format(trainingAccuracy) + "%")
 
         # Parse Test data
         testData = []
@@ -226,7 +231,7 @@ def main():
 
         # Accuracy on test set
         testAccuracy = getAccuracy(headNode, testData, attributes)
-        print("Accuracy on test set (" + str(len(trainingData)) + "): " + "{0:.1f}".format(testAccuracy) + "%")
+        #print("Accuracy on test set (" + str(len(trainingData)) + "): " + "{0:.1f}".format(testAccuracy) + "%")
 
 
 
