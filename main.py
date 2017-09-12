@@ -155,16 +155,16 @@ def displayTree(currentNode, depth):
     if currentNode == None:
         return
     if currentNode.leftNode == None:
-        print(" " + str(currentNode.leafClass), end='')
+        print("  " + str(currentNode.leafClass), end='')
         return
 
     # Print what this node split on
     # 0 side
-    print("\n" + "| " * depth + currentNode.splitOn + " = 0 : ", end='')
+    print("\n" + "| " * depth + currentNode.splitOn + " = 0 :", end='')
     displayTree(currentNode.leftNode, depth+1)
 
-    # 1 side
-    print("\n" + "| " * depth + currentNode.splitOn + " = 1 : ", end='')
+    # 1 sides
+    print("\n" + "| " * depth + currentNode.splitOn + " = 1 :", end='')
     displayTree(currentNode.rightNode, depth+1)
 
     pass
@@ -175,24 +175,24 @@ def getAccuracy(headNode, data):
     # loop over data
     for row in data:
         # traverse binary tree
-        node = headNode
-        while node != None:
+        nodeT = headNode
+        while nodeT != None:
             # leaf node
-            if node.leafClass == 0 or node.leafClass == 1:
+            if nodeT.leafClass == 0 or nodeT.leafClass == 1:
                 # add correct count
-                # print("leaf class = " + str(node.leafClass))
+                # print("leaf class = " + str(nodeT.leafClass))
                 # print("row class = " + row[headNode.attributes.index("class")])
-                if int(node.leafClass) == int(row[headNode.attributes.index("class")]):
+                if int(nodeT.leafClass) == int(row[headNode.attributes.index("class")]):
                     correct += 1
                 break
             # Go in direction of split
             else:
                 # left
-                if row[headNode.attributes.index(node.splitOn)] == 0:
-                    node = node.leftNode
+                if row[headNode.attributes.index(nodeT.splitOn)] == '0':
+                    nodeT = nodeT.leftNode
                 # right
                 else:
-                    node = node.rightNode
+                    nodeT = nodeT.rightNode
 
     return (correct / int(len(data))) * 100
 
