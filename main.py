@@ -13,8 +13,6 @@ class node():
         self.attributes = []
 
     def splitOnBestInformationGain (self):
-        classIndex = self.attributes.index("class")
-
         # Calculate current Entropy of node
         if self.entropy == None:
             self.calEntropy()
@@ -42,19 +40,20 @@ class node():
             # print(leftSplit)
 
             # Calculate IG with formula
-            H_L = calcEntropy(leftSplit, classIndex)
-            H_R = calcEntropy(rightSplit, classIndex)
-            P_R = len(leftSplit)/len(self.data)
-            P_L = len(rightSplit)/len(self.data)
+            H_L = calcEntropy(leftSplit, self.attributes.index("class"))
+            H_R = calcEntropy(rightSplit, self.attributes.index("class"))
+            P_L = len(leftSplit)/len(self.data)
+            P_R = len(rightSplit)/len(self.data)
             IG = H - ((P_L*H_L)+(P_R*H_R))
+            # print("{0:.3f}".format(IG) + " = " + "{0:.3f}".format(H) + "(( " + "{0:.3f}".format(P_L) + " * " + "{0:.3f}".format(H_L) + ")+(" + "{0:.3f}".format(P_R) + " * " + "{0:.3f}".format(H_R) + "))")
             IGList.append(IG)
 
         # Sets node to split on the attritute where we have maximum information gain
-        print(IGList)
-        maxIG = max(IGList)
+        # print(IGList)
         # if the best IG is positive and there is more than just the Class left to split on
-        if maxIG > 0 and len(IGList) > 1:
-            self.splitOn = self.attributes[IGList.index(maxIG)]
+        if len(IGList) > 0 and max(IGList) > 0 and len(IGList) > 0:
+            # print(IGList.index(maxIG))
+            self.splitOn = self.attributes[IGList.index(max(IGList))]
             # Nodes to split on
             self.leftNode = node()
             self.rightNode = node()
@@ -102,8 +101,11 @@ class node():
             self.leafClass = mostFrequentClassOverall
         # Set to the most frequent class
         else:
-            # print("total = " + str(total))
-            # print("len = " + str(len(self.data)))
+            print("total = " + str(total))
+            print("len = " + str(len(self.data)))
+            print("leafClass = " + str(round( total / len(self.data))))
+            if round( total / len(self.data)) == 1 :
+                print(self.data)
             self.leafClass = round( total / len(self.data))
             # print("leafClass = " + str(self.leafClass))
 
@@ -188,6 +190,7 @@ def getAccuracy(headNode, data):
                 # left
                 if row[headNode.attributes.index(node.splitOn)] == 0:
                     node = node.leftNode
+                # right
                 else:
                     node = node.rightNode
 
@@ -196,7 +199,7 @@ def getAccuracy(headNode, data):
 
 def main():
     # Reading in data just reading in the training file (train.dat)
-    with open("train2.dat") as trainingFile, open ("test2.dat") as testFile:
+    with open("train.dat") as trainingFile, open ("test.dat") as testFile:
         first_line = trainingFile.readline()
         attributes = first_line.split()
 
@@ -204,7 +207,7 @@ def main():
         for line in trainingFile:
             trainingData.append(list(line.strip().replace('\t', '')))
 
-        print(trainingData)
+        # print(trainingData)
 
         # Calculate most frequent class, set global instead of passing mostFrequentClassOverall or full dataset around to ever function
         total = 0
